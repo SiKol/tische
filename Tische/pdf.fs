@@ -55,7 +55,6 @@ type PDFWriter(xsl: string) =
 
     // Transform given XML and output to the given filename as PDF.
     member self.Transform (filename: string) (xnode: XElement) =
-//        printf "%s" (xnode.ToString())
         // transform the xml into xsl-fo
         let xsl = transform xnode
         // create our FOP UA

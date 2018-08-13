@@ -1,4 +1,11 @@
 ﻿<?xml version="1.0"?>
+<!--
+   This file is part of Tische, which is copyright (c) 2018 SiKol Ltd.
+   Refer to README.md in the Tische distribution for licensing and
+   distribution terms.
+  -->
+
+<!-- Define the configuration file schema. -->
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="tische">
     <xs:complexType>
