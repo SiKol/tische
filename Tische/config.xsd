@@ -1,0 +1,54 @@
+﻿<?xml version="1.0"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="tische">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="threads" minOccurs="0" type="xs:string" />
+
+        <xs:element name="input">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="connection" type="xs:string" />
+              <xs:element name="query" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="output">
+          <xs:complexType>
+            <xs:sequence>
+
+              <xs:element name="group" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="field" type="xs:string" />
+                    <xs:element name="multilevel" type="xs:integer" minOccurs="0" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="directory" minOccurs="0" type="xs:string" />
+              <xs:element name="filename" type="xs:string" />
+              <xs:element name="overwrite" minOccurs="0" type="xs:boolean" />
+              <xs:element name="style" minOccurs="0" type="xs:string" />
+
+              <xs:element name="columns">
+                <xs:complexType>
+                  <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element name="column">
+                      <xs:complexType>
+                        <xs:attribute name="name" type="xs:string" use="required" />
+                        <xs:attribute name="width" type="xs:string" use="optional" />
+                        <xs:attribute name="heading" type="xs:string" use="optional" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

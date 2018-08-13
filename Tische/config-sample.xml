@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--
+   This file is part of Tische, which is copyright (c) 2018 SiKol Ltd.
+   Refer to README.md in the Tische distribution for licensing and
+   distribution terms.
+-->
+
+<!--
+  This is a sample configuration file for Tische; you can edit it according to
+  your needs.
+-->
+
+<tische>
+  <!--
+    How many PDF creation threads to use.  Default: 1.
+  -->
+  <threads>1</threads>
+
+  <!--
+    Choose where the data comes from.
+  -->
+  <input>
+    <!-- A standard SQL Server connection string. -->
+    <connection>server=(local);database=tischetest;integrated Security=SSPI;</connection>
+
+    <!-- The query to run. -->
+    <query>
+      <![CDATA[
+      SELECT firstname, lastname, age FROM person
+    ]]>
+    </query>
+  </input>
+
+  <!--
+    Configure the output file.
+  -->
+  <output>
+    <!--
+      Grouping is optional. Configure this if you want to generate multiple output files
+      based on the input data, e.g. one output file for each value of a particular column.
+    -->
+    <group>
+      <!--
+        Set this to the name of the field you want to group by.  One file will be created
+        for each value of field.
+      -->
+      <field>lastname</field>
+
+      <!--
+        If you want the grouped output filename to be created as a multi-level directory
+        tree, set this to chop the filename into chunks of the configured length.  For
+        example, if multilevel is 2, then the file "123456.pdf" will be saved to
+        "12\34\123456.pdf".
+
+        This should be used if you're generating more than ~100,000 output files, to avoid
+        creating too many files in the same directory.
+      -->
+      <multilevel>2</multilevel>
+    </group>
+
+    <!--
+      All output will be created relative to this directory.  If not specified, then
+      output will be created in the current directory.
+    -->
+    <directory>output</directory>
+
+    <!--
+      Output will be written to this filename.  If using <group>, you must use %G in the
+      filename to create a separate file for each group column value; %G will be replaced
+      by the grouped field value.  For example:
+
+        <filename>data-%G.pdf</filename>
+    -->
+    <filename>data.pdf</filename>
+
+    <!--
+      Whether to overwrite existing files.  If false, existing files will be skipped,
+      otherwise they will be regenerated.  Default: true.
+    -->
+    <overwrite>true</overwrite>
+
+    <!--
+      Specify column definitions here.  This controls which columns will be included
+      in the output PDF.
+    -->
+    <columns>
+      <!--
+        Each <column> defines one output column.  "name" is mandatory and must match
+        the name of the column in the SQL query.
+
+        "heading" is optional and specifies the heading text to use for this column
+        in the output table.  If not specified, the SQL column name will be used.
+
+        "width" is optional and specifies the width of the column, e.g. "10%".
+        Columns without a width specified will be allocated an equal width each.
+      -->
+      <column name="firstname" heading="First name" />
+      <column name="lastname" heading="Last name" />
+      <column name="age" width="10%" />
+    </columns>
+  </output>
+</tische>
