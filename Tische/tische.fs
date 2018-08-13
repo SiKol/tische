@@ -79,9 +79,22 @@ let main argv =
                     config.threads,         // concurrency
                     fun doc -> writeDocument writer config doc)
 
-    // Add all documents to the work queue and wait for processing to finish.
-    documents |> Seq.iter workq.addWork
-    workq.finish()
+    try
+        // Add all documents to the work queue and wait for processing to finish.
+        documents |> Seq.iter workq.addWork
+        workq.finish()
+        0 // exit success
+    with
+    | :?System.AggregateException as excs ->
+        for exc in excs.InnerExceptions do
+            match exc with
+            | KeyNotFound knf ->
+                printfn "error: invalid column name \"%s\"" knf
+            | any -> printfn "error: %s" any.Message
+        1
+    | ex ->
+        printfn "error: %s" ex.Message
+        1 // exit failure
 
 (*
     // benchmarking
@@ -100,7 +113,5 @@ let main argv =
     let secs = (double ts.Seconds) + ((double ts.Milliseconds) / 1000.0)
     let persec = (double runs) / secs
     printfn "%d runs in %.2fs (%.2f/sec)" runs secs persec
-    *)
-
-    // successful return
     0
+    *)

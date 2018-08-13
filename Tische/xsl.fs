@@ -16,9 +16,10 @@ open System.Xml.Linq
 let xn (s: string) = XName.Get(s)
 
 let item (s: string) = new XElement(xn "i", s)
+let column coldef row = fetch coldef.Name row |> item
 
 let row cols r =
-    let items = [for col in cols -> item (fetch col.Name r)]
+    let items = [for col in cols -> column col r]
     new XElement(xn "row", items)
 
 let header cols = new XElement(xn "header", [for col in cols -> item col.Heading])

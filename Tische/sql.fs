@@ -49,7 +49,7 @@ exception KeyNotFound of string
 let fetch key row =
     match fetch' key row.Fields with
     | Some value    -> value
-    | None          -> raise (KeyNotFound("could not find key in row"))
+    | None          -> raise (KeyNotFound(key))
 
 // Given a reader and a field index, make a Field for that field.
 let makeField (reader : SqlDataReader) fieldnum = {
