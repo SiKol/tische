@@ -6,12 +6,16 @@ Currently, only MS SQL Server is supported.
 See `config-sample.xml` for a sample configuration file.  You must edit at
 least `<connection>`, `<query>` and `<columns>`.  
 
+Run Tische and provide your configuration file:
+
 ```
 PS> tische config.xml
 ```
 
-Currently no binary distribution is available.  Build using Visual Studio or MSBuild;
-building the Installer project will create an NSIS-based installer executable.
+An (unsigned) installer and portable executable are available from the GitHub
+'Releases' page. 
+
+Please report any issues to ft@le-fay.org.
 
 ## License
 
