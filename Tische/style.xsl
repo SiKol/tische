@@ -1,9 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
-   This file is part of Tische, which is copyright (c) 2018 SiKol Ltd.
-   Refer to README.md in the Tische distribution for licensing and
-   distribution terms.
+  This file is part of Tische, which is copyright (c) 2018 SiKol Ltd.
+  Refer to README.md in the Tische distribution for licensing and
+  distribution terms.
+
+  NOTE: This file is provided in the Tische installation directory as an
+  example only.  Editing it will have no effect, because the default style
+  is hardcoded in tische.exe, not read from this file.  To use a custom XSL-FO
+  style, you must use the <style> option in config.xml.
 -->
+<!--
+
+  This is the XSL-FO style used to generate the output PDFs.
+  
+  The input XML looks like this:
+  
+    <report>
+      <columns>
+        <column name="col1" width="auto" />
+        <column name="col2" width="80%" />
+      </columns>
+      <header>
+        <i>First column heading</i>
+        <i>Second column heading</i>
+      </header>
+      <row>
+        <i>First row, item 1</i>
+        <i>First row, item 2</i>
+      </row>
+      <row>
+        <i>Second row, item 1</i>
+        ...
+      </row>
+    </report>
+    
+  Here we format this as a fixed layout table using <fo:table>.
+  -->
 <xsl:stylesheet version="1.1" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:fo="http://www.w3.org/1999/XSL/Format" exclude-result-prefixes="fo">
 
@@ -11,6 +43,7 @@
   <xsl:template match="report">
     <fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format">
       <fo:layout-master-set>
+        <!-- A4 with reasonable margins -->
         <fo:simple-page-master
           master-name="A4"
           page-height="29.7cm"
@@ -23,6 +56,7 @@
         </fo:simple-page-master>
       </fo:layout-master-set>
 
+      <!-- The page sequence containing the actual document. -->
       <fo:page-sequence master-reference="A4">
         <fo:flow flow-name="xsl-region-body">
           <fo:block font-size="10pt">

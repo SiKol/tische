@@ -6,93 +6,166 @@
 -->
 
 <!--
-  This is a sample configuration file for Tische; you can edit it according to
-  your needs.
+  This is a sample configuration file for Tische.  You should copy this to a
+  local directory and edit it as necessary, then run Tische on it:
+  
+    PS> tische config.xml
 -->
 
 <tische>
   <!--
-    How many PDF creation threads to use.  Default: 1.
+    How many PDF creation threads to use.  Default: 1.  Increasing this up
+    to the number of CPU cores in the system may improve performance.
   -->
   <threads>1</threads>
 
-  <!--
-    Choose where the data comes from.
-  -->
+  <!-- Configure the SQL data source here.  Only MS SQL Server is supported. -->
   <input>
-    <!-- A standard SQL Server connection string. -->
-    <connection>server=(local);database=tischetest;integrated Security=SSPI;</connection>
+    <!-- A standard SQL Server connection string.  -->
+    <connection>server=(local);database=mydb;integrated Security=SSPI;</connection>
 
-    <!-- The query to run. -->
+    <!-- 
+      The query to run.  This can be any query which generates a result set
+      with at least one column.  The column names in the result set much
+      match the columns defined in <columns> below; you can use SELECT...AS...
+      if necessary.
+    -->
     <query>
       <![CDATA[
-      SELECT firstname, lastname, age FROM person
+      SELECT firstname, lastname, age
+      FROM person
+      ORDER BY lastname ASC
     ]]>
     </query>
   </input>
 
-  <!--
-    Configure the output file.
-  -->
+  <!-- Configure the output file. -->
   <output>
     <!--
-      Grouping is optional. Configure this if you want to generate multiple output files
-      based on the input data, e.g. one output file for each value of a particular column.
+      Tische comes with a default embedded output style that provides fixed
+      table based output on A4.  If you want to use a different output style,
+      you can specify your own XSL-FO transform here.  See "style.xsd" in the
+      Tische installation directory for an example.
+    -->
+
+    <!--  <style>mystyle.xsl</style>  -->
+    
+    <!--
+      Output file grouping creates a separate output file for each distinct
+      value of a given result column.  This is optional; if used, note that
+      you must also include the pattern "%G" in the output filename.
+      
+      IMPORTANT:
+      
+      For this to work, the SQL query **MUST** order the result set by the
+      grouping column.  For example, if you group by lastname, then the query
+      should be "SELECT ... ORDER BY lastname".  Whether the order is
+      ascending or descending does not matter, and you can order by additional
+      fields if desired, e.g. "ORDER BY lastname, age", so long as the primary
+      ordering is by the grouping column.
+      
+      This restriction is necessary to allow Tische to write each file on the
+      fly without having to read the entire result set into memory to perform
+      grouping.
+      
+      Tische will not verify this for you; if the result set is not ordered
+      correctly then either you will get failures with a strange error message
+      or you will silently get incorrect output.
     -->
     <group>
       <!--
-        Set this to the name of the field you want to group by.  One file will be created
-        for each value of field.
+        Set this to the name of the field you want to group by.  One file
+        will be created for each value of field, e.g. if you group by
+        lastname, and filename is set to "data-%G.pdf", then you might end
+        up with "data-Smith.pdf", "data-Johnson.pdf" and "data-Harris.pdf".
       -->
       <field>lastname</field>
 
       <!--
-        If you want the grouped output filename to be created as a multi-level directory
-        tree, set this to chop the filename into chunks of the configured length.  For
-        example, if multilevel is 2, then the file "123456.pdf" will be saved to
-        "12\34\123456.pdf".
-
-        This should be used if you're generating more than ~100,000 output files, to avoid
-        creating too many files in the same directory.
+        If you want the grouped output filename to be created as a multi-level
+        directory tree, set this to chop the filename into chunks of the
+        configured length. 
+        
+        NTFS can support an essentially unlimited number of files in a single
+        directory, so this is entirely optional, but can make it easier to
+        locate files using Windows Explorer.  If you intend to store the
+        output tree on a FAT filesystem, you should avoid more than a few
+        thousand files in one directory for performance reasons.
+        
+        If multilevel is 2, then the file "123456.pdf" will be created as
+        "12\34\123456.pdf".  Note that the value controls the length of each
+        directory name, not the total depth of the tree; the directory tree
+        will be as deep as required to hold each filename.
+        
+        This works best if the grouping field is the same length for every
+        file (e.g., using fixed padding if the field is numeric), but that is
+        not strictly required:
+        
+          "1.pdf"     -> "1.pdf"
+          "12.pdf"    -> "12.pdf"
+          "123.pdf"   -> "12\3.pdf"
+          "1234.pdf"  -> "12\34.pdf"
+          "12345.pdf" -> "12\34\5.pdf"
+          ...
+          
       -->
       <multilevel>2</multilevel>
     </group>
 
     <!--
-      All output will be created relative to this directory.  If not specified, then
-      output will be created in the current directory.
+      Where to place the output file(s).   If not specified, then output will
+      be created in the current directory.
     -->
     <directory>output</directory>
 
     <!--
-      Output will be written to this filename.  If using <group>, you must use %G in the
-      filename to create a separate file for each group column value; %G will be replaced
-      by the grouped field value.  For example:
+      Name of the output file to create.  If using <group>, you must use %G in
+      the filename to create a separate file for each group column value; %G
+      will be replaced by the grouped field value.  For example:
 
         <filename>data-%G.pdf</filename>
     -->
     <filename>data.pdf</filename>
 
     <!--
-      Whether to overwrite existing files.  If false, existing files will be skipped,
-      otherwise they will be regenerated.  Default: true.
+      Whether to overwrite existing output files.  If false, output files
+      which already exist will be skipped.
+      
+      Set this to false to improve performance across multiple runs by not
+      re-creating files which already exist; this also means you can interrupt
+      Tische, restart it, and have it continue where it left off.  However,
+      this only works properly if the input data does not change between runs.
+      
+      Note that when Tische writes a PDF, it first writes to "<name>.pdf.tmp",
+      then renames that file to "<name>.pdf".  Renaming is an atomic operation
+      which either succeeds or fails; it cannot partially succeed or only
+      rename half the file.
+      
+      This means interrupting Tische, even through a power failure or
+      operating system crash, will not create partially-written output files:
+      the output is either written completely or not at all.  Re-running
+      Tische on the same data will clean up any stray ".tmp" files left from
+      an interrupted run.
     -->
     <overwrite>true</overwrite>
 
     <!--
-      Specify column definitions here.  This controls which columns will be included
-      in the output PDF.
+      Specify column definitions here.  This controls which columns will be
+      included in the output PDF.
     -->
     <columns>
       <!--
-        Each <column> defines one output column.  "name" is mandatory and must match
-        the name of the column in the SQL query.
+        Each <column> defines one output column.  "name" is mandatory and must
+        match the name of the column in the SQL query (or its AS alias, if
+        any).
 
-        "heading" is optional and specifies the heading text to use for this column
-        in the output table.  If not specified, the SQL column name will be used.
+        "heading" is optional and specifies the heading text to use for this
+        column in the output table.  If not specified, the SQL column name
+        will be used.
 
         "width" is optional and specifies the width of the column, e.g. "10%".
-        Columns without a width specified will be allocated an equal width each.
+        Columns without a width specified will be allocated an equal width
+        each.
       -->
       <column name="firstname" heading="First name" />
       <column name="lastname" heading="Last name" />

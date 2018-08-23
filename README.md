@@ -1,8 +1,10 @@
 # Tische
 
-Convert SQL queries into PDFs.  Only MS SQL Server is supported.
+Tische executes SQL queries and renders the result as a PDF using XSL-FO.
+Currently, only MS SQL Server is supported.
 
-To use, copy `config-sample.xml` to `config.xml` and run it:
+See `config-sample.xml` for a sample configuration file.  You must edit at
+least `<connection>`, `<query>` and `<columns>`.  
 
 ```
 PS> tische config.xml

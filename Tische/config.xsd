@@ -25,6 +25,7 @@
           <xs:complexType>
             <xs:sequence>
 
+              <xs:element name="style" minOccurs="0" type="xs:string"/>
               <xs:element name="group" minOccurs="0">
                 <xs:complexType>
                   <xs:sequence>

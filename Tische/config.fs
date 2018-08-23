@@ -10,6 +10,9 @@ open System.IO
 open FSharp.Data
 open System
 open CommandLine
+open FSharp.Configuration
+
+type Resources = ResXProvider<"Resources.resx">
 
 //=============================
 // Configuration file handling.
@@ -25,8 +28,10 @@ exception ConfigError of string
 
 // A type representing our parsed arguments.
 type Arguments = {
-    [<Option('v', "verbose", HelpText="be more verbose about operations")>] verbose : bool;
-    [<Value(0, MetaName="config", HelpText="Configuration File")>] config : string option;
+    [<Option('v', "verbose", HelpText="be more verbose about operations")>]
+    verbose : bool;
+    [<Value(0, Default="config.xml", MetaName="config", HelpText="configuration file")>]
+    config : string;
 }
 
 // Parse our arguments and return an Arguments object.
@@ -45,16 +50,12 @@ type ColumnDefinition = {
 
 type Config(argv) =
     let args = parseArguments argv
-    let config =
-        match args.config with
-        | None -> "config.xml"
-        | Some file -> file
 
     // Parse our XML configuration file and store the data.
     let xmlconfig =
-        if args.verbose then printfn "loading configuration from \"%s\"..." config
-        try     XmlConfig.Parse(File.ReadAllText(config))
-        with    e -> raise (ConfigError(config + ": " + e.Message))
+        if args.verbose then printfn "loading configuration from \"%s\"..." args.config
+        try     XmlConfig.Parse(File.ReadAllText(args.config))
+        with    e -> raise (ConfigError(e.Message))
 
     member val verbose = args.verbose
 
@@ -106,6 +107,15 @@ type Config(argv) =
             match gc.Multilevel with
             | None -> 0
             | Some levels -> int levels
+
+    // String containing the XSL stylesheet for rendering.
+    member self.xslstyle =
+        match xmlconfig.Output.Style with
+        | None -> Resources.style
+        | Some filename -> 
+            try File.ReadAllText(filename)
+            with exc -> failwithf "could not load the XSL transform from \
+file \"%s\" (specified in configuration file): %s" filename exc.Message
 
     // Column definitions
     member self.columns =

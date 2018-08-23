@@ -62,7 +62,12 @@ let writeDocument (writer: PDFWriter) (config: Config) (doc: OutputDocument) =
     else
         let tempfile = filename + ".tmp"
 
-        Console.WriteLine("writing to \"{0}\" for group value \"{1}\"", filename, doc.AggregateKey)
+        // cannot use printf here because it's not thread-safe
+        if doc.AggregateKey <> "" then
+            Console.WriteLine("writing to \"{0}\" for group value \"{1}\"", filename, doc.AggregateKey)
+        else
+            Console.WriteLine("writing to \"{0}\"", filename)
+        
         makeXml config.columns doc.Rows
         |> writer.Transform tempfile
 

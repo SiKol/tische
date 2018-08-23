@@ -19,7 +19,7 @@ Section "Tische command-line utility"
 	File ..\Tische\bin\$%Configuration%\*.exe
 	File ..\Tische\bin\$%Configuration%\*.dll
 	File ..\Tische\config-sample.xml
-	File ..\Tische\config.xsd
+	File /oname=style-sample.xsl ..\Tische\style.xsl 
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
 
